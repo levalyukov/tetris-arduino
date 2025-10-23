@@ -1,8 +1,6 @@
 #include <SPFD5408_Adafruit_GFX.h>
 #include <SPFD5408_Adafruit_TFTLCD.h>
 #include <SPFD5408_TouchScreen.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "config.hpp"
 #include "game.hpp"
@@ -25,10 +23,6 @@ Tetris::Figure figure = {
 };
 
 void setup(void) {
-  // Test only
-  Serial.begin(9600);
-  // ---------
-
   tft.reset();
   tft.begin(0x9341);
   tft.setRotation(1);
@@ -69,9 +63,7 @@ void drawBoard(void) {
   tft.setTextSize(2);
   tft.println(scores);
 
-  for (size_t y = 0; y < tft.height(); y++) {
-    tft.drawPixel(11*SCALE, y, 0xFFFF);
-  };
+  tft.drawFastVLine(11*SCALE, 0, tft.height(), 0xFFFF);
 };
 
 void initDisplayGrid(void) {
@@ -106,11 +98,7 @@ void clearFigure(void) {
   };
 };
 
-void movementFigure(void) {
-  if (figure.position.y+1 == GRID_Y-1) return;
-
-  clearFigure();
-  figure.position.y++;
+void moveFigure(void) {
   for (size_t x = 0; x < FIGURE_SIZE; x++) {
     for (size_t y = 0; y < FIGURE_SIZE; y++) {
       if (figure.position.x + x >= 0 && figure.position.x < GRID_X-1 && figure.position.y + y >= 0 && figure.position.y < GRID_Y-1) {
@@ -120,6 +108,14 @@ void movementFigure(void) {
       };
     };
   };
+};
+
+void movementFigure(void) {
+  if (figure.position.y+1 == GRID_Y-1) return;
+
+  clearFigure();
+  figure.position.y++;
+  moveFigure();
 };
 
 void drawDisplay(void) {
