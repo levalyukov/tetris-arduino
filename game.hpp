@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include <stdint.h> // for uint8_t, uint16_t and etc...
 #include <stddef.h> // for size_t
 
@@ -35,11 +36,25 @@ class Tetris {
       initGrid();
     };
 
+    inline Figure setFigure(const uint8_t id) {
+      switch (id) {
+        case 1:
+          return {
+            Vector(0,0), 
+            {
+              {0,1,0,0},
+              {1,1,0,0},
+              {0,1,0,0},
+              {0,0,0,0} 
+            }
+          };
+      };
+    };
+
   private:
     inline void initGrid(void) {
       for (uint8_t x = 0; x < GRID_X; x++) {
         for (uint8_t y = 0; y < GRID_Y; y++) GRID[x][y] = 0;
       };
     };
-
 };
