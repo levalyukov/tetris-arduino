@@ -14,6 +14,8 @@ const Tetris::Vector GRID_MARGINS(2,2);
 uint8_t display[GRID_X][GRID_Y];
 Tetris::Figure figure;
 
+int id = 1;
+
 void setup(void) {
   Serial.begin(9600);
 
@@ -27,7 +29,7 @@ void setup(void) {
 };
 
 void game(void) {
-  figure = tetris.setFigure(1);
+  figure = tetris.setFigure(id);
   drawGrid();
   drawBoard();
   initDisplayGrid();
@@ -92,6 +94,28 @@ uint8_t getFigureHeight(void) {
   }; return heigth;
 };
 
+uint8_t getFigureWidth(void) {
+  uint8_t width = 0;
+  for (size_t x = 0; x < FIGURE_SIZE; x++) {
+    for (size_t y = 0; y < FIGURE_SIZE; y++) {
+      if (figure.shape[x][y] != 0) {
+        width++;
+        break;
+      };
+    };
+  }; return width;
+};
+
+bool checkCollision(void) {
+  for (size_t x = 0; x < FIGURE_SIZE; x++) {
+    for (size_t y = 0; y < FIGURE_SIZE; y++) {
+      if (figure.shape[x][y] != 0) {
+        if (display[figure.position.x+x][figure.position.y+getFigureHeight()] != 0) return true;
+      };
+    };
+  }; return false;
+};
+
 void softDropFigure(void) {
   for (size_t x = 0; x < FIGURE_SIZE; x++) {
     for (size_t y = 0; y < FIGURE_SIZE; y++) {
@@ -105,8 +129,9 @@ void softDropFigure(void) {
 };
 
 void movementFigure(void) {
-  if (figure.position.y + getFigureHeight() >= GRID_Y) {
-    bakeFigure();
+  if (figure.position.y + getFigureHeight() >= GRID_Y || checkCollision()) {
+    id++;
+    figure = tetris.setFigure(id);
     return;
   };
 
@@ -127,6 +152,8 @@ void drawDisplay(void) {
   for (size_t x = 0; x < GRID_X; x++) {
     for (size_t y = 0; y < GRID_Y; y++) { 
       if (display[x][y] == 1) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFF00);
+      else if (display[x][y] == 2) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF800);
+      else if (display[x][y] == 3) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFC81);
       else tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x0000);
     };
   };
@@ -139,5 +166,5 @@ void update(void) {
 
 void loop(void) {
   update();
-  delay(1000);
+  delay(INTERVAL);
 };
