@@ -66,6 +66,7 @@ void drawBoard(void) {
 };
 
 void addFigure(void) {
+  clearFigure();
   for (size_t x = 0; x < FIGURE_SIZE; x++) {
     for (size_t y = 0; y < FIGURE_SIZE; y++) {
       if (figure.position.x + x >= 0 && figure.position.x < GRID_X && figure.position.y + y >= 0 && figure.position.y < GRID_Y) {
@@ -109,37 +110,16 @@ uint8_t getFigureWidth(void) {
   }; return width;
 };
 
-bool checkCollision(void) {
-  for (size_t x = 0; x < FIGURE_SIZE; x++) {
-    for (size_t y = 0; y < FIGURE_SIZE; y++) {
-      if (figure.shape[x][y] != 0) {
-        if (display[figure.position.x+x][figure.position.y+getFigureHeight()] != 0) return true;
-      };
-    };
-  }; return false;
-};
-
-void softDropFigure(void) {
-  for (size_t x = 0; x < FIGURE_SIZE; x++) {
-    for (size_t y = 0; y < FIGURE_SIZE; y++) {
-      if (figure.position.x + x >= 0 && figure.position.x < GRID_X && figure.position.y + y >= 0 && figure.position.y < GRID_Y) {
-        if (figure.shape[x][y] != 0) {
-          display[figure.position.x+x][figure.position.y+y] = figure.shape[x][y];
-        };
-      };
-    };
-  };
-};
-
 void movementFigure(void) {
-  if (figure.position.y + getFigureHeight() >= GRID_Y || checkCollision()) {
+  if (figure.position.y+getFigureHeight() >= GRID_Y) {
     figure = tetris.setFigure(3);
-    return;
+    clearFigure();
+    addFigure();
+  } else {
+    clearFigure();
+    figure.position.y++;
+    addFigure();
   };
-
-  clearFigure();
-  figure.position.y++;
-  softDropFigure();
 };
 
 void initDisplayGrid(void) {
@@ -171,11 +151,42 @@ void update(void) {
 };
 
 void shiftFigure(int8_t move) {
-  if (figure.position.x+getFigureWidth()+move > 0 && figure.position.x+getFigureWidth()+move <= GRID_X) {
-    if (figure.position.x == 0 && move == -1) return;
-    figure.position.x+=move;
+  if (figure.position.x+getFigureWidth()+move > GRID_X) return;
+  if (figure.position.x == 0 && move == -1) return;
+  
+  clearFigure();
+  figure.position.x+=move;
+};
+
+void control(void) {
+  if (Serial.available() > 0) {
+    consoleCommand = Serial.read();
+    switch (consoleCommand) {
+      case 'q': // left
+        shiftFigure(-1);
+        break;
+
+      case 'e': // right
+        shiftFigure(1);
+        break;
+
+      default: break;
+    }; Serial.read();
   };
 };
+
+void loop(void) {
+  if (tetris.Game) {
+    control();
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= INTERVAL) {      
+      previousMillis = currentMillis;
+      update();
+    };
+  } else over();
+};
+
+//
 
 void over(void) {
   tft.fillScreen(0x0000);
@@ -197,34 +208,4 @@ void over(void) {
   tft.setTextSize(1);
   tft.setCursor((tft.width()-(restart.length()*CHAR_WIDTH))/2, tft.height()-50);
   tft.println(restart);
-};
-
-void control(void) {
-  if (Serial.available() > 0) {
-    consoleCommand = Serial.read();
-    switch (consoleCommand) {
-      case 'q': // left
-        clearFigure();
-        shiftFigure(-1);
-        break;
-
-      case 'e': // right
-        clearFigure();
-        shiftFigure(1);
-        break;
-
-      default: break;
-    }; Serial.read();
-  };
-};
-
-void loop(void) {
-  if (tetris.Game) {
-    unsigned long currentMillis = millis();
-    control();
-    if (currentMillis - previousMillis >= INTERVAL) {      
-      previousMillis = currentMillis;
-      update();
-    };
-  } else over();
 };
