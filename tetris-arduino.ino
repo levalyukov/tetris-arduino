@@ -14,22 +14,25 @@ const Tetris::Vector GRID_MARGINS(0,0);
 uint8_t display[GRID_X][GRID_Y];
 Tetris::Figure figure;
 char consoleCommand;
+unsigned long previousMillis = 0;
 
 void setup(void) {
   Serial.begin(9600);
 
   tft.reset();
   tft.begin(0x9341);
-  tft.setRotation(0);
+  tft.setRotation(1);
   tft.fillScreen(0x0000);
 
   tetris.begin();
-  // game();
-  over();
+  game();
+  // over();
 };
 
 void game(void) {
+  tft.fillScreen(0x0000);
   figure = tetris.setFigure(3);
+
   drawGrid();
   // drawBoard();
   initDisplayGrid();
@@ -175,6 +178,7 @@ void shiftFigure(int8_t move) {
 };
 
 void over(void) {
+  tft.fillScreen(0x0000);
   String title = "-- Game Over --";
   String scores = "Scores: " + String(tetris.scores);
   String restart = "Press Restart";
@@ -195,21 +199,32 @@ void over(void) {
   tft.println(restart);
 };
 
-void loop(void) {
-  // if (Serial.available() > 0) {
-  //   consoleCommand = Serial.read();
-  //   switch (consoleCommand) {
-  //     case 'q': // left
-  //       clearFigure();
-  //       shiftFigure(-1);
-  //       break;
-  //     case 'e': // right
-  //       clearFigure();
-  //       shiftFigure(1);
-  //       break;
+void control(void) {
+  if (Serial.available() > 0) {
+    consoleCommand = Serial.read();
+    switch (consoleCommand) {
+      case 'q': // left
+        clearFigure();
+        shiftFigure(-1);
+        break;
 
-  //     default: break;
-  //   };
-  // };
-  // update();
+      case 'e': // right
+        clearFigure();
+        shiftFigure(1);
+        break;
+
+      default: break;
+    }; Serial.read();
+  };
+};
+
+void loop(void) {
+  if (tetris.Game) {
+    unsigned long currentMillis = millis();
+    control();
+    if (currentMillis - previousMillis >= INTERVAL) {      
+      previousMillis = currentMillis;
+      update();
+    };
+  } else over();
 };
