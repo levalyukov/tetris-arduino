@@ -10,28 +10,28 @@ Tetris tetris;
 Adafruit_TFTLCD tft(cfg.LCD_CS, cfg.LCD_CD, cfg.LCD_WR, cfg.LCD_RD, cfg.LCD_RESET);
 
 #define CHAR_WIDTH 6
-const Tetris::Vector GRID_MARGINS(2,2);
+const Tetris::Vector GRID_MARGINS(0,0);
 uint8_t display[GRID_X][GRID_Y];
 Tetris::Figure figure;
-
-int id = 1;
+char consoleCommand;
 
 void setup(void) {
   Serial.begin(9600);
 
   tft.reset();
   tft.begin(0x9341);
-  tft.setRotation(1);
+  tft.setRotation(0);
   tft.fillScreen(0x0000);
 
   tetris.begin();
-  game();
+  // game();
+  over();
 };
 
 void game(void) {
-  figure = tetris.setFigure(id);
+  figure = tetris.setFigure(3);
   drawGrid();
-  drawBoard();
+  // drawBoard();
   initDisplayGrid();
   update();
 };
@@ -130,8 +130,7 @@ void softDropFigure(void) {
 
 void movementFigure(void) {
   if (figure.position.y + getFigureHeight() >= GRID_Y || checkCollision()) {
-    id++;
-    figure = tetris.setFigure(id);
+    figure = tetris.setFigure(3);
     return;
   };
 
@@ -151,9 +150,13 @@ void initDisplayGrid(void) {
 void drawDisplay(void) {
   for (size_t x = 0; x < GRID_X; x++) {
     for (size_t y = 0; y < GRID_Y; y++) { 
-      if (display[x][y] == 1) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFF00);
-      else if (display[x][y] == 2) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF800);
-      else if (display[x][y] == 3) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFC81);
+      if (display[x][y] == 1) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x07FF);
+      else if (display[x][y] == 2) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFD20);
+      else if (display[x][y] == 3) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFFE0);
+      else if (display[x][y] == 4) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF800);
+      else if (display[x][y] == 5) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF81C);
+      else if (display[x][y] == 6) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x07ED);
+      else if (display[x][y] == 7) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF7D7);
       else tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x0000);
     };
   };
@@ -164,7 +167,49 @@ void update(void) {
   drawDisplay();
 };
 
+void shiftFigure(int8_t move) {
+  if (figure.position.x+getFigureWidth()+move > 0 && figure.position.x+getFigureWidth()+move <= GRID_X) {
+    if (figure.position.x == 0 && move == -1) return;
+    figure.position.x+=move;
+  };
+};
+
+void over(void) {
+  String title = "-- Game Over --";
+  String scores = "Scores: " + String(tetris.scores);
+  String restart = "Press Restart";
+
+  tft.setTextColor(0xFFFF);
+  tft.setTextSize(2);
+  tft.setCursor((tft.width()-(title.length()*CHAR_WIDTH*2))/2, 25);
+  tft.println(title);
+
+  tft.setTextColor(0xFFFF);
+  tft.setTextSize(2);
+  tft.setCursor((tft.width()-(scores.length()*CHAR_WIDTH*2))/2, 75);
+  tft.println(scores);
+
+  tft.setTextColor(0xC618);
+  tft.setTextSize(1);
+  tft.setCursor((tft.width()-(restart.length()*CHAR_WIDTH))/2, tft.height()-50);
+  tft.println(restart);
+};
+
 void loop(void) {
-  update();
-  delay(INTERVAL);
+  // if (Serial.available() > 0) {
+  //   consoleCommand = Serial.read();
+  //   switch (consoleCommand) {
+  //     case 'q': // left
+  //       clearFigure();
+  //       shiftFigure(-1);
+  //       break;
+  //     case 'e': // right
+  //       clearFigure();
+  //       shiftFigure(1);
+  //       break;
+
+  //     default: break;
+  //   };
+  // };
+  // update();
 };

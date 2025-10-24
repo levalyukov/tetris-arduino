@@ -4,11 +4,11 @@
 #include <stdint.h> // for uint8_t, uint16_t and etc...
 #include <stddef.h> // for size_t
 
-#define SCALE 16
-#define GRID_Y 10
-#define GRID_X 7
+#define SCALE 20
+#define GRID_Y 16
+#define GRID_X 10
 #define FIGURE_SIZE 4
-#define INTERVAL 1000
+#define INTERVAL 100
 
 class Tetris {
   public:
@@ -38,29 +38,29 @@ class Tetris {
 
     inline Figure setFigure(const uint8_t id) {
       switch (id) {
-        case 1:
-          return {
-            Vector(0,0), 
-            {
-              {1,1,1,1},
-              {0,0,0,0},
-              {0,0,0,0},
-              {0,0,0,0} 
-            }
-          };
-        case 2:
-          return {
-            Vector(0,0), 
-            {
-              {0,2,0,0},
-              {2,2,0,0},
-              {0,2,0,0},
-              {0,0,0,0} 
-            }
-          };
+        // case 1:
+        //   return {
+        //     Vector(0,0), 
+        //     {
+        //       {1,1,1,1},
+        //       {0,0,0,0},
+        //       {0,0,0,0},
+        //       {0,0,0,0} 
+        //     }
+        //   };
+        // case 2:
+        //   return {
+        //     Vector(0,0), 
+        //     {
+        //       {0,2,0,0},
+        //       {2,2,0,0},
+        //       {0,2,0,0},
+        //       {0,0,0,0} 
+        //     }
+        //   };
         case 3:
           return {
-            Vector(3,0), 
+            Vector(0,0), 
             {
               {3,3,0,0},
               {3,3,0,0},
@@ -68,6 +68,46 @@ class Tetris {
               {0,0,0,0} 
             }
           };
+        // case 4:
+        //   return {
+        //     Vector(4,0),
+        //     {
+        //       {4,4,4,0},
+        //       {0,0,4,0},
+        //       {0,0,0,0},
+        //       {0,0,0,0}
+        //     }
+        //   };
+        // case 5:
+        //   return {
+        //     Vector(5,0),
+        //     {
+        //       {0,0,5,0},
+        //       {5,5,5,0},
+        //       {0,0,0,0},
+        //       {0,0,0,0}
+        //     }
+        //   };
+        // case 6:
+        //   return {
+        //     Vector(5,0),
+        //     {
+        //       {0,6,0,0},
+        //       {6,6,0,0},
+        //       {6,0,0,0},
+        //       {0,0,0,0}
+        //     }
+        //   };
+        // case 7:
+        //   return {
+        //     Vector(5,0),
+        //     {
+        //       {7,0,0,0},
+        //       {7,7,0,0},
+        //       {0,7,0,0},
+        //       {0,0,0,0}
+        //     }
+        //   };
       };
     };
 
