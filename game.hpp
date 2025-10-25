@@ -16,9 +16,9 @@ class Tetris {
     ~Tetris() = default;
 
     struct Vector {
-      uint16_t x; uint8_t y;
+      int8_t x, y;
       Vector() = default;
-      Vector(uint16_t x_val, uint8_t y_val) : x(x_val), y(y_val) {};
+      Vector(int8_t x_val, int8_t y_val) : x(x_val), y(y_val) {};
     };
 
     struct Figure {
@@ -35,80 +35,7 @@ class Tetris {
       Game = true;
     };
 
-    inline Figure setFigure(const uint8_t id) {
-      switch (id) {
-        case 1:
-          return {
-            Vector(0,0), 
-            {
-              {1,1,1,1},
-              {0,0,0,0},
-              {0,0,0,0},
-              {0,0,0,0} 
-            }
-          };
-        case 2:
-          return {
-            Vector(0,0), 
-            {
-              {0,2,0,0},
-              {2,2,0,0},
-              {0,2,0,0},
-              {0,0,0,0} 
-            }
-          };
-        case 3:
-          return {
-            Vector(0,0), 
-            {
-              {3,3,0,0},
-              {3,3,0,0},
-              {0,0,0,0},
-              {0,0,0,0} 
-            }
-          };
-        case 4:
-          return {
-            Vector(0,0),
-            {
-              {4,4,4,0},
-              {0,0,4,0},
-              {0,0,0,0},
-              {0,0,0,0}
-            }
-          };
-        case 5:
-          return {
-            Vector(0,0),
-            {
-              {0,0,5,0},
-              {5,5,5,0},
-              {0,0,0,0},
-              {0,0,0,0}
-            }
-          };
-        case 6:
-          return {
-            Vector(0,0),
-            {
-              {0,6,0,0},
-              {6,6,0,0},
-              {6,0,0,0},
-              {0,0,0,0}
-            }
-          };
-        case 7:
-          return {
-            Vector(0,0),
-            {
-              {7,0,0,0},
-              {7,7,0,0},
-              {0,7,0,0},
-              {0,0,0,0}
-            }
-          };
-      };
-    };
+    Figure setFigure(const uint8_t id);
 
   private:
     inline void initGrid(void) {
