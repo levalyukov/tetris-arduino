@@ -91,8 +91,7 @@ uint8_t getFigureHeight(void) {
   for (size_t x = 0; x < FIGURE_SIZE; x++) {
     for (size_t y = 0; y < FIGURE_SIZE; y++) {
       if (figure.shape[y][x] != 0) {
-        heigth++;
-        break;
+        heigth++; break;
       };
     };
   }; return heigth;
@@ -103,29 +102,47 @@ uint8_t getFigureWidth(void) {
   for (size_t x = 0; x < FIGURE_SIZE; x++) {
     for (size_t y = 0; y < FIGURE_SIZE; y++) {
       if (figure.shape[x][y] != 0) {
-        width++;
-        break;
+        width++; break;
       };
     };
   }; return width;
 };
 
-void movementFigure(void) {
-  if (figure.position.y+getFigureHeight() >= GRID_Y) {
-    figure = tetris.setFigure(3);
-    clearFigure();
+bool checkCollision(void) {
+  for (size_t x = 0; x < getFigureWidth(); x++) {
+    for (size_t y = 0; y < getFigureHeight(); y++) {
+      if (figure.shape[x][y] != 0) {
+        int positionX = figure.position.x+x;
+        int positionY = figure.position.y+y;
+        if (positionX < 0 || positionX >= GRID_X || 
+            positionY < 0 || positionY >= GRID_Y ||
+            display[positionX][positionY] != 0
+        ) return true;
+      }
+    };
+  }; return false;
+};
+
+void movementFigure(void) {  
+  clearFigure();
+  figure.position.y++;
+  if (checkCollision()) {
+    figure.position.y--;
     addFigure();
-  } else {
-    clearFigure();
-    figure.position.y++;
-    addFigure();
-  };
+    for (size_t x = 0; x < getFigureWidth(); x++) {
+      for (size_t y = 0; y < getFigureHeight(); y++) {
+        if (figure.shape[x][y] != 0) {
+          display[figure.position.x+x][figure.position.y+y] = figure.shape[x][y];
+        };
+      };
+    }; figure = tetris.setFigure(random(1,8));
+  }; addFigure();
 };
 
 void initDisplayGrid(void) {
   for (size_t x = 0; x < GRID_X; x++) {
     for (size_t y = 0; y < GRID_Y; y++) {
-      display[x][y] = tetris.GRID[x][y];
+      display[x][y] = 0;
     };
   };
 };
@@ -150,12 +167,25 @@ void update(void) {
   drawDisplay();
 };
 
-void shiftFigure(int8_t move) {
-  if (figure.position.x+getFigureWidth()+move > GRID_X) return;
-  if (figure.position.x == 0 && move == -1) return;
-  
-  clearFigure();
-  figure.position.x+=move;
+bool canMoveHorizontal(int move) {
+  if (figure.position.x+move < 0) return false;
+  if (figure.position.x+getFigureWidth()+move > GRID_X) return false;
+  for (size_t x = 0; x < getFigureWidth(); x++) {
+    for (size_t y = 0; y < getFigureHeight(); y++) {
+      if (figure.shape[x][y] != 0) {
+        int positionX = figure.position.x+move+x;
+        int positionY = figure.position.y+y;
+        if (display[positionX][positionY] != 0) return false;
+      };
+    };
+  }; return true;
+};
+
+void moveHorizontal(int move) {
+  if (canMoveHorizontal(move)) {
+    clearFigure();
+    figure.position.x+=move;
+  };
 };
 
 void control(void) {
@@ -163,11 +193,11 @@ void control(void) {
     consoleCommand = Serial.read();
     switch (consoleCommand) {
       case 'q': // left
-        shiftFigure(-1);
+        moveHorizontal(-1);
         break;
 
       case 'e': // right
-        shiftFigure(1);
+        moveHorizontal(1);
         break;
 
       default: break;

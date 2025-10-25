@@ -8,7 +8,7 @@
 #define GRID_Y 12 //16
 #define GRID_X 8 // 10
 #define FIGURE_SIZE 4
-#define INTERVAL 500
+#define INTERVAL 250
 
 class Tetris {
   public:
@@ -69,7 +69,7 @@ class Tetris {
           };
         case 4:
           return {
-            Vector(4,0),
+            Vector(0,0),
             {
               {4,4,4,0},
               {0,0,4,0},
@@ -79,7 +79,7 @@ class Tetris {
           };
         case 5:
           return {
-            Vector(5,0),
+            Vector(0,0),
             {
               {0,0,5,0},
               {5,5,5,0},
@@ -89,7 +89,7 @@ class Tetris {
           };
         case 6:
           return {
-            Vector(5,0),
+            Vector(0,0),
             {
               {0,6,0,0},
               {6,6,0,0},
@@ -99,7 +99,7 @@ class Tetris {
           };
         case 7:
           return {
-            Vector(5,0),
+            Vector(0,0),
             {
               {7,0,0,0},
               {7,7,0,0},
