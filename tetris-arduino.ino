@@ -98,6 +98,7 @@ void movementFigure(void) {
   if (checkCollision()) {
     figure.position.y--;
     addFigure();
+    cleanLines();
     spawnFigure();
     tetris.scores+=5;
     if (!tetris.Game) return;
@@ -119,7 +120,7 @@ void drawDisplay(void) {
           case 6: color = 0x07ED; break;
           case 7: color = 0xF7D7; break;
         };
-
+        
         tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, color);
       };
     };
@@ -143,6 +144,31 @@ void moveHorizontal(int8_t move) {
   if (canMoveHorizontal(move)) {
     clearFigure();
     figure.position.x+=move;
+  };
+};
+
+void cleanLines(void) {
+  for (size_t y = GRID_Y-1; y > 0; y--) {
+    bool lineFull = true; 
+    for (size_t x = 0; x < GRID_X; x++) {
+      if (tetris.GRID[x][y] == 0) {
+        lineFull = false;
+        break;
+      };
+    };
+
+    if (lineFull) {
+      tetris.scores+=10;
+      for (size_t yy = y; yy > 0; yy--) {
+        for (size_t x = 0; x < GRID_X; x++) {
+          tetris.GRID[x][yy] = tetris.GRID[x][yy-1];
+        };
+      };
+
+      for (size_t x = 0; x < GRID_X; x++) {
+        tetris.GRID[x][y] = 0;
+      }; y++;
+    };
   };
 };
 
