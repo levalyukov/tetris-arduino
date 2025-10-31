@@ -4,9 +4,9 @@
 #include <stdint.h> // for uint8_t, uint16_t and etc...
 #include <stddef.h> // for size_t
 
-#define SCALE 16
-#define GRID_Y 15 //16
-#define GRID_X 15 // 10
+#define SCALE 20
+#define GRID_Y 12 //16
+#define GRID_X 8 // 10
 #define FIGURE_SIZE 4
 #define INTERVAL 250
 

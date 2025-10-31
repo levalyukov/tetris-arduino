@@ -69,13 +69,13 @@ bool checkCollision(void) {
   for (size_t x = 0; x < figureWidth; x++) {
     for (size_t y = 0; y < figureHeight; y++) {
       if (figure.shape[x][y] != 0) {
-        int positionX = figure.position.x+x;
-        int positionY = figure.position.y+y;
+        int8_t positionX = figure.position.x+x;
+        int8_t positionY = figure.position.y+y;
         if (positionX < 0 || positionX >= GRID_X || 
             positionY < 0 || positionY >= GRID_Y ||
             tetris.GRID[positionX][positionY] != 0
         ) return true;
-      }
+      };
     };
   }; return false;
 };
@@ -93,18 +93,12 @@ void spawnFigure(void) {
 };
 
 void movementFigure(void) {  
-  clearFigure();
   figure.position.y++;
   if (checkCollision()) {
     figure.position.y--;
     addFigure();
-    for (size_t x = 0; x < figureWidth; x++) {
-      for (size_t y = 0; y < figureHeight; y++) {
-        if (figure.shape[x][y] != 0) {
-          tetris.GRID[figure.position.x+x][figure.position.y+y] = figure.shape[x][y];
-        };
-      };
-    }; spawnFigure();
+    spawnFigure();
+    tetris.scores+=5;
     if (!tetris.Game) return;
   }; addFigure();
 };
@@ -113,35 +107,38 @@ void drawDisplay(void) {
   if (tetris.Game) {
     for (size_t x = 0; x < GRID_X; x++) {
       for (size_t y = 0; y < GRID_Y; y++) { 
-        if (tetris.GRID[x][y] == 1) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x07FF);
-        else if (tetris.GRID[x][y] == 2) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFD20);
-        else if (tetris.GRID[x][y] == 3) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xFFE0);
-        else if (tetris.GRID[x][y] == 4) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF800);
-        else if (tetris.GRID[x][y] == 5) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF81C);
-        else if (tetris.GRID[x][y] == 6) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x07ED);
-        else if (tetris.GRID[x][y] == 7) tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0xF7D7);
-        else tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, 0x0000);
+        uint16_t color = 0x0000;
+
+        switch (tetris.GRID[x][y]) {
+          case 1: color = 0x07FF; break;
+          case 2: color = 0xFD20; break;
+          case 3: color = 0xFFE0; break;
+          case 4: color = 0xF800; break;
+          case 5: color = 0xF81C; break;
+          case 6: color = 0x07ED; break;
+          case 7: color = 0xF7D7; break;
+        };
+
+        tft.fillRect(GRID_MARGINS.x*SCALE+x*SCALE+1, GRID_MARGINS.y*SCALE+y*SCALE+1, SCALE-1, SCALE-1, color);
       };
     };
   };
 };
 
-bool canMoveHorizontal(int move) {
+bool canMoveHorizontal(int8_t move) {
   if (figure.position.x+move < 0) return false;
   if (move > 0 && figure.position.x+figureWidth+move > GRID_X) return false;
   for (size_t x = 0; x < figureWidth; x++) {
     for (size_t y = 0; y < figureHeight; y++) {
-      int positionX = figure.position.x+move;
-      int positionY = figure.position.y+y;
+      int8_t positionX = figure.position.x+move;
+      int8_t positionY = figure.position.y+y;
       if (move > 0) positionX = figure.position.x+figureWidth;
       if (tetris.GRID[positionX][positionY] != 0) return false;
     };
-  }; 
-  
-  return true;
+  }; return true;
 };
 
-void moveHorizontal(int move) {
+void moveHorizontal(int8_t move) {
   if (canMoveHorizontal(move)) {
     clearFigure();
     figure.position.x+=move;
@@ -152,14 +149,8 @@ void control(void) {
   if (Serial.available() > 0) {
     consoleCommand = Serial.read();
     switch (consoleCommand) {
-      case 'q': // left
-        moveHorizontal(-1);
-        break;
-
-      case 'e': // right
-        moveHorizontal(1);
-        break;
-
+      case 'q': moveHorizontal(-1); break;
+      case 'e': moveHorizontal(1); break;
       default: break;
     }; Serial.read();
   };
@@ -173,6 +164,7 @@ void update(void) {
 void loop(void) {
   if (tetris.Game) {
     control();
+    update();
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= INTERVAL) {      
       previousMillis = currentMillis;
@@ -185,9 +177,9 @@ void over(void) {
   tft.fillScreen(0x0000);
 
   char title[] = "Game Over";
-  char scores[32] = "Scores: ";
+  char scores[16] = "Scores: ";
   char restart[] = "Press to Restart ->";
-  char num_buff[16];
+  char num_buff[8];
 
   sprintf(num_buff, "%i", tetris.scores);
   strcat(scores, num_buff);
