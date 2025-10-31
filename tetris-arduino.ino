@@ -93,6 +93,7 @@ void spawnFigure(void) {
 };
 
 void movementFigure(void) {  
+  clearFigure();
   figure.position.y++;
   if (checkCollision()) {
     figure.position.y--;
@@ -164,7 +165,6 @@ void update(void) {
 void loop(void) {
   if (tetris.Game) {
     control();
-    update();
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= INTERVAL) {      
       previousMillis = currentMillis;
